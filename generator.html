@@ -140,6 +140,42 @@
         .form-control.additional-text {
             padding-right: 8px !important;
         }
+        /* Кнопка очистки (крестик) */
+        .btn-clear {
+            height: fit-content !important;
+            align-self: flex-start !important;
+            margin-top: 0 !important;
+        }
+        /* Ненавязчивая валидация - иконка ошибки */
+        .field-error-icon {
+            color: #dc3545;
+            margin-left: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .field-error-icon.show {
+            display: inline-block;
+        }
+        /* Подсветка обязательных полей */
+        .form-label.required::after {
+            content: ' *';
+            color: #dc3545;
+        }
+        /* Сообщение об ошибке под полем */
+        .field-error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+            padding: 2px 8px !important;
+            display: none;
+        }
+        .field-error-message.show {
+            display: block;
+        }
+        /* Отступы для красной рамки валидации */
+        .mb-3.border-danger.rounded {
+            padding: 2px 8px !important;
+        }
         #saveIndicator {
             transition: opacity 0.3s;
             opacity: 0;
@@ -189,6 +225,9 @@
                                         https://nikita-zhilin.file.dalee.ru/dalee_sotrud/
                                     </span>
                                     <input type="text" class="form-control" id="photoTask" placeholder="DIHR-931_20.02.2026" value="" onchange="updateAllPhotoUrls()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearInput(this)" title="Очистить">
+                                        <i class="bi bi-x"></i>
+                                    </button>
                                 </div>
                                 <small class="text-muted">Введите номер задачи — фото применится ко всем сотрудникам автоматически</small>
                             </div>
@@ -275,24 +314,24 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label">Вступительный текст</label>
-                            <div class="position-relative">
-                                <textarea class="form-control" id="introText" rows="3">Всем привет! Продолжаем расти вместе с вами и благодаря вам!
+                            <label class="form-label required">Вступительный текст</label>
+                            <div class="d-flex gap-2">
+                                <textarea class="form-control flex-grow-1" id="introText" rows="3" placeholder="Введите вступительный текст">Всем привет! Продолжаем расти вместе с вами и благодаря вам!
 
 Давайте знакомиться с ново прибывшими коллегами:</textarea>
-                                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="clearInput(this)" title="Очистить" style="position: absolute; top: 5px; right: 5px;">
+                                <button class="btn btn-outline-secondary btn-sm btn-clear" type="button" onclick="clearInput(this)" title="Очистить">
                                     <i class="bi bi-x"></i>
                                 </button>
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label">Завершающий текст</label>
-                            <div class="position-relative">
-                                <textarea class="form-control" id="outroText" rows="3">Всем спасибо и добро пожаловать в ДАЛЕЕ!
+                            <label class="form-label required">Завершающий текст</label>
+                            <div class="d-flex gap-2">
+                                <textarea class="form-control flex-grow-1" id="outroText" rows="3" placeholder="Введите завершающий текст">Всем спасибо и добро пожаловать в ДАЛЕЕ!
 
 Крутых вам выходных — не забывайте отдыхать &lt;3</textarea>
-                                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="clearInput(this)" title="Очистить" style="position: absolute; top: 5px; right: 5px;">
+                                <button class="btn btn-outline-secondary btn-sm btn-clear" type="button" onclick="clearInput(this)" title="Очистить">
                                     <i class="bi bi-x"></i>
                                 </button>
                             </div>
@@ -351,10 +390,10 @@
                         </div>
                     </div>
                     <div id="previewContainer">
-                        <iframe id="previewFrame" class="preview-frame w-100"></iframe>
+                        <iframe id="previewFrame" class="preview-frame w-100" onload="adjustIframeHeight()" onerror="handleIframeError()"></iframe>
                     </div>
                     <div id="codeContainer" style="display: none;">
-                        <textarea id="codeView" class="form-control font-monospace" style="height: calc(100vh - 350px); min-height: 500px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; white-space: pre; overflow-x: auto;" readonly></textarea>
+                        <textarea id="codeView" class="form-control font-monospace" style="height: calc(100vh - 350px); min-height: 500px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; white-space: pre; overflow-wrap: normal; word-break: keep-all;" readonly></textarea>
                     </div>
                 </div>
             </div>
@@ -463,8 +502,8 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Фотография *</label>
-                                
+                                <label class="form-label required">Фотография</label>
+
                                 <div class="mb-2">
                                     <label class="form-label small text-muted">URL с сервера:</label>
                                     <div class="input-group input-group-sm mb-2">
@@ -476,13 +515,13 @@
                                             <i class="bi bi-x"></i>
                                         </button>
                                     </div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="buildPhotoUrl(this)">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="buildPhotoUrl(this)" title="Автоматически сформировать URL из номера задачи и имени файла">
                                         <i class="bi bi-link-45deg"></i> Сформировать URL
                                     </button>
                                 </div>
-                                
+
                                 <div class="input-group">
-                                    <input type="text" class="form-control photo-url" placeholder="Или вставьте полный URL картинки" value="${data?.photo || ''}">
+                                    <input type="text" class="form-control photo-url" placeholder="https://nikita-zhilin.file.dalee.ru/dalee_sotrud/..." value="${data?.photo || ''}">
                                     <select class="form-select photo-format-select" style="max-width: 80px;" onchange="updatePhotoFormat(this)" title="Формат файла">
                                         <option value="jpg"${getFormatFromUrl(data?.photo) === 'jpg' ? ' selected' : ''}>.jpg</option>
                                         <option value="jpeg"${getFormatFromUrl(data?.photo) === 'jpeg' ? ' selected' : ''}>.jpeg</option>
@@ -495,7 +534,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">ФИО *</label>
+                                <label class="form-label required">ФИО</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control full-name" required value="${data?.fullName || ''}" oninput="updateEmployeeNameDisplay(${id})" placeholder="Введите ФИО">
                                     <button class="btn btn-outline-secondary" type="button" onclick="clearInput(this)" title="Очистить">
@@ -505,7 +544,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Должность и команда *</label>
+                                <label class="form-label required">Должность и команда</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control position" placeholder="например: Менеджер SMM проектов в команде Скотч" required value="${data?.position || ''}">
                                     <button class="btn btn-outline-secondary" type="button" onclick="clearInput(this)" title="Очистить">
@@ -515,7 +554,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Город и возраст *</label>
+                                <label class="form-label required">Город и возраст</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control city-age" placeholder="например: Санкт-Петербург, 22 года" required value="${data?.cityAge || ''}">
                                     <button class="btn btn-outline-secondary" type="button" onclick="clearInput(this)" title="Очистить">
@@ -525,10 +564,10 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Описание (биография) *</label>
+                                <label class="form-label required">Описание (биография)</label>
                                 <div class="d-flex gap-2">
                                     <textarea class="form-control description flex-grow-1" rows="4" required placeholder="Текст биографии" onblur="updatePreview()">${data?.description || ''}</textarea>
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="clearInput(this)" title="Очистить" style="height: fit-content; align-self: flex-start; margin-top: 0;">
+                                    <button class="btn btn-outline-secondary btn-sm btn-clear" type="button" onclick="clearInput(this)" title="Очистить">
                                         <i class="bi bi-x"></i>
                                     </button>
                                 </div>
@@ -539,7 +578,7 @@
                                 <label class="form-label">Дополнительный текст</label>
                                 <div class="d-flex gap-2">
                                     <textarea class="form-control additional-text flex-grow-1" rows="2" placeholder="Дополнительная информация" onblur="updatePreview()">${data?.additionalText || ''}</textarea>
-                                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="clearInput(this)" title="Очистить" style="height: fit-content; align-self: flex-start; margin-top: 0;">
+                                    <button class="btn btn-outline-secondary btn-sm btn-clear" type="button" onclick="clearInput(this)" title="Очистить">
                                         <i class="bi bi-x"></i>
                                     </button>
                                 </div>
@@ -694,12 +733,12 @@
         }
         
         // Сбор данных из всех форм с валидацией
-        function getEmployeesFromForms(validate = true) {
+        function getEmployeesFromForms(validate = true, showNonIntrusiveErrors = true) {
             const forms = document.querySelectorAll('.employee-form-card');
             const result = [];
             let hasErrors = false;
 
-            forms.forEach((form) => {
+            forms.forEach((form, formIndex) => {
                 const photoTask = form.querySelector('.photo-task').value.trim();
                 const photoImage = form.querySelector('.photo-image').value.trim();
                 let photo = form.querySelector('.photo-url').value.trim();
@@ -723,11 +762,71 @@
                     .replace(/\n/g, '<br>');
 
                 // Валидация обязательных полей (только если включена)
-                if (validate && (!photo || !fullName || !position || !cityAge || !description)) {
-                    hasErrors = true;
-                    form.classList.add('border-danger');
+                const photoField = form.querySelector('.photo-url');
+                const fullNameField = form.querySelector('.full-name');
+                const positionField = form.querySelector('.position');
+                const cityAgeField = form.querySelector('.city-age');
+                const descriptionField = form.querySelector('.description');
+
+                // Проверяем каждое поле и показываем ошибки ненавязчиво
+                if (validate && showNonIntrusiveErrors) {
+                    // Фото
+                    if (!photo) {
+                        hasErrors = true;
+                        photoField.closest('.mb-3').classList.add('border-danger', 'rounded');
+                        showFieldError(photoField, 'Укажите фото');
+                    } else {
+                        photoField.closest('.mb-3').classList.remove('border-danger', 'rounded');
+                        hideFieldError(photoField);
+                    }
+
+                    // ФИО
+                    if (!fullName) {
+                        hasErrors = true;
+                        fullNameField.closest('.mb-3').classList.add('border-danger', 'rounded');
+                        showFieldError(fullNameField, 'Введите ФИО');
+                    } else {
+                        fullNameField.closest('.mb-3').classList.remove('border-danger', 'rounded');
+                        hideFieldError(fullNameField);
+                    }
+
+                    // Должность
+                    if (!position) {
+                        hasErrors = true;
+                        positionField.closest('.mb-3').classList.add('border-danger', 'rounded');
+                        showFieldError(positionField, 'Введите должность');
+                    } else {
+                        positionField.closest('.mb-3').classList.remove('border-danger', 'rounded');
+                        hideFieldError(positionField);
+                    }
+
+                    // Город и возраст
+                    if (!cityAge) {
+                        hasErrors = true;
+                        cityAgeField.closest('.mb-3').classList.add('border-danger', 'rounded');
+                        showFieldError(cityAgeField, 'Введите город и возраст');
+                    } else {
+                        cityAgeField.closest('.mb-3').classList.remove('border-danger', 'rounded');
+                        hideFieldError(cityAgeField);
+                    }
+
+                    // Описание
+                    if (!description) {
+                        hasErrors = true;
+                        descriptionField.closest('.mb-3').classList.add('border-danger', 'rounded');
+                        showFieldError(descriptionField, 'Введите описание');
+                    } else {
+                        descriptionField.closest('.mb-3').classList.remove('border-danger', 'rounded');
+                        hideFieldError(descriptionField);
+                    }
                 } else {
-                    form.classList.remove('border-danger');
+                    // Просто убираем все ошибки если валидация выключена
+                    [photoField, fullNameField, positionField, cityAgeField, descriptionField].forEach(field => {
+                        if (field && field.closest('.mb-3')) {
+                            field.closest('.mb-3').classList.remove('border-danger', 'rounded');
+                            hideFieldError(field);
+                        }
+                    });
                 }
 
                 result.push({
@@ -741,12 +840,64 @@
                 });
             });
 
-            if (hasErrors) {
-                alert('Заполните все обязательные поля (отмечены красной рамкой)');
+            if (hasErrors && validate) {
+                // Показываем ненавязчивое уведомление вверху страницы
+                showValidationSummary();
                 return null;
             }
 
             return result;
+        }
+
+        // Показать ошибку для конкретного поля
+        function showFieldError(field, message) {
+            const mb3 = field.closest('.mb-3');
+            if (!mb3) return;
+
+            // Убираем старые сообщения об ошибках
+            const oldMessage = mb3.querySelector('.field-error-message');
+            if (oldMessage) oldMessage.remove();
+
+            // Создаём новое сообщение
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error-message show';
+            errorDiv.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + message;
+            mb3.appendChild(errorDiv);
+        }
+
+        // Скрыть ошибку для конкретного поля
+        function hideFieldError(field) {
+            const mb3 = field.closest('.mb-3');
+            if (!mb3) return;
+            const errorDiv = mb3.querySelector('.field-error-message');
+            if (errorDiv) errorDiv.remove();
+        }
+
+        // Показать сводку ошибок
+        function showValidationSummary() {
+            // Показываем временное уведомление
+            const existingAlert = document.querySelector('.validation-alert');
+            if (existingAlert) existingAlert.remove();
+
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-warning alert-dismissible fade show validation-alert';
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.left = '50%';
+            alert.style.transform = 'translateX(-50%)';
+            alert.style.zIndex = '9999';
+            alert.style.minWidth = '300px';
+            alert.innerHTML = `
+                <i class="bi bi-exclamation-triangle"></i> 
+                Заполните все обязательные поля (отмечены красной рамкой)
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alert);
+
+            // Автозакрытие через 5 секунд
+            setTimeout(() => {
+                if (alert.parentNode) alert.remove();
+            }, 5000);
         }
 
         // Загрузка данных из localStorage
@@ -827,7 +978,16 @@
         
         // Очистка всех данных
         function clearAllData() {
-            if (confirm('Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.')) {
+            const forms = document.querySelectorAll('.employee-form-card');
+            const employeeCount = forms.length;
+            
+            let message = 'Вы уверены, что хотите очистить все данные? Это действие нельзя отменить.\n\n';
+            if (employeeCount > 0) {
+                message += `🗑️ Будет удалено сотрудников: ${employeeCount}\n`;
+            }
+            message += '\n💡 Совет: перед очисткой экспортируйте данные в JSON для резервной копии.';
+            
+            if (confirm(message)) {
                 document.getElementById('employeesForms').innerHTML = '';
                 formCounter = 0;
                 localStorage.removeItem(STORAGE_KEY);
@@ -1140,23 +1300,23 @@
         function updateAllPhotoUrls() {
             const task = document.getElementById('photoTask').value.trim();
             if (!task) return;
-            
+
             const forms = document.querySelectorAll('.employee-form-card');
             forms.forEach((form, index) => {
                 const urlInput = form.querySelector('.photo-url');
                 const taskInput = form.querySelector('.photo-task');
                 const imageInput = form.querySelector('.photo-image');
                 const formatSelect = form.querySelector('.photo-format-select');
-                
+
                 const number = index + 1;
                 const format = formatSelect?.value || 'jpg';
-                
+
                 const photoUrl = `https://nikita-zhilin.file.dalee.ru/dalee_sotrud/${task}/${number}.${format}`;
                 urlInput.value = photoUrl;
                 taskInput.value = task;
                 imageInput.value = `${number}.${format}`;
             });
-            
+
             updatePreview();
             saveToStorage();
         }
@@ -1242,15 +1402,11 @@
                     photo: ''
                 };
                 
-                // Ищем фото
+                // Ищем фото (просто для информации, не сохраняем)
                 const photoMatch = textUntilNext.match(/https:\/\/disk\.360\.yandex\.ru\/i\/[^\s\)]+/i);
                 if (photoMatch) {
-                    employee.photo = photoMatch[0];
-                    console.log('Фото:', employee.photo);
-                    
-                    // Пытаемся извлечь номер задачи из ссылки на Яндекс.Диск
-                    // Ссылка вида https://disk.360.yandex.ru/i/xxxxx -> нужно найти соответствующий URL на file.dalee.ru
-                    // Пока оставляем пустым, пользователь заполнит вручную
+                    console.log('Найдено фото в Яндекс.Диске:', photoMatch[0]);
+                    // Не сохраняем ссылку, пользователь сам введёт номер задачи
                 }
                 
                 // Ищем описание - текст после города/возраста
@@ -1293,17 +1449,15 @@
             // Создаём формы для каждого сотрудника
             if (employees.length > 0) {
                 employees.forEach(emp => {
-                    // Разбираем URL фото на части
-                    const urlMatch = emp.photo?.match(/dalee_sotrud\/([^\/]+)\/(.+)$/);
                     addEmployeeForm({
                         fullName: emp.fullName,
                         position: emp.position,
                         cityAge: emp.cityAge,
                         description: emp.description,
                         additionalText: emp.additionalText,
-                        photo: emp.photo,
-                        photoTask: urlMatch ? urlMatch[1] : '',
-                        photoImage: urlMatch ? urlMatch[2] : ''
+                        photo: '',
+                        photoTask: '',
+                        photoImage: ''
                     });
                 });
                 
@@ -1424,9 +1578,19 @@
                 if (iframe && iframe.contentDocument && iframe.contentDocument.body) {
                     const contentHeight = iframe.contentDocument.body.scrollHeight;
                     iframe.style.height = (contentHeight + 20) + 'px';
+                    iframe.style.opacity = '1';
                 }
             } catch (e) {
                 console.error('Ошибка при расчёте высоты iframe:', e);
+            }
+        }
+
+        // Обработка ошибок iframe
+        function handleIframeError() {
+            const iframe = document.getElementById('previewFrame');
+            if (iframe) {
+                iframe.style.opacity = '0.5';
+                console.error('Ошибка загрузки содержимого iframe');
             }
         }
         
@@ -1449,6 +1613,19 @@
             return div.innerHTML;
         }
 
+        // Безопасная обработка описания с сохранением <br> (защита от XSS)
+        function sanitizeDescription(str) {
+            if (!str) return '';
+            // Сначала экранируем весь HTML
+            const div = document.createElement('div');
+            div.textContent = str;
+            let safe = div.innerHTML;
+            // Затем разрешаем только <br> и <br><br>
+            safe = safe.replace(/&lt;br&gt;&lt;br&gt;/gi, '<br><br>');
+            safe = safe.replace(/&lt;br&gt;/gi, '<br>');
+            return safe;
+        }
+
         // Генерация HTML
         function generateHTML(employeesToRender = null) {
             const employeesList = employeesToRender || employees;
@@ -1469,8 +1646,8 @@
                 const safeFullName = escapeHTML(emp.fullName);
                 const safePosition = escapeHTML(emp.position);
                 const safeCityAge = escapeHTML(emp.cityAge);
-                const safeDescription = emp.description; // Уже содержит <br>, не экранируем
-                const safeAdditionalText = emp.additionalText; // Уже содержит <br>, не экранируем
+                const safeDescription = sanitizeDescription(emp.description); // Безопасная обработка с <br>
+                const safeAdditionalText = sanitizeDescription(emp.additionalText); // Безопасная обработка с <br>
                 
                 let html = `
         <tr>
