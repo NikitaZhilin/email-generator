@@ -254,7 +254,14 @@
                 font-size: 0.8rem;
                 padding: 4px 8px;
             }
-            /* Предпросмотр */
+            /* Предпросмотр - масштабирование */
+            #previewContainer {
+                overflow-x: auto;
+                min-height: 500px;
+            }
+            #previewScaler {
+                transform-origin: top left;
+            }
             .preview-frame {
                 min-height: 400px;
             }
@@ -537,8 +544,10 @@
                             </button>
                         </div>
                     </div>
-                    <div id="previewContainer">
-                        <iframe id="previewFrame" class="preview-frame w-100" onload="adjustIframeHeight()" onerror="handleIframeError()"></iframe>
+                    <div id="previewContainer" style="position: relative; overflow-x: auto;">
+                        <div id="previewScaler" style="transform-origin: top left; transition: transform 0.3s;">
+                            <iframe id="previewFrame" class="preview-frame w-100" onload="adjustIframeHeight()" onerror="handleIframeError()"></iframe>
+                        </div>
                     </div>
                     <div id="codeContainer" style="display: none;">
                         <textarea id="codeView" class="form-control font-monospace" style="height: calc(100vh - 350px); min-height: 500px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; white-space: pre; overflow-wrap: normal; word-break: keep-all;" readonly></textarea>
@@ -1727,9 +1736,39 @@
                     const contentHeight = iframe.contentDocument.body.scrollHeight;
                     iframe.style.height = (contentHeight + 20) + 'px';
                     iframe.style.opacity = '1';
+                    
+                    // Масштабирование для мобильных
+                    scalePreview();
                 }
             } catch (e) {
                 console.error('Ошибка при расчёте высоты iframe:', e);
+            }
+        }
+        
+        // Масштабирование предпросмотра для мобильных
+        function scalePreview() {
+            const scaler = document.getElementById('previewScaler');
+            const previewContainer = document.getElementById('previewContainer');
+            if (!scaler || !previewContainer) return;
+            
+            const containerWidth = previewContainer.clientWidth;
+            const iframeWidth = 600; // Ширина письма
+            
+            // Масштабируем только если контейнер уже письма
+            if (containerWidth < iframeWidth && containerWidth > 0) {
+                const scale = containerWidth / iframeWidth;
+                scaler.style.transform = `scale(${scale})`;
+                scaler.style.width = `${iframeWidth}px`;
+                // Увеличиваем высоту контейнера для компенсирования масштаба
+                const iframe = document.getElementById('previewFrame');
+                if (iframe) {
+                    const scaledHeight = iframe.offsetHeight * scale;
+                    scaler.style.height = `${scaledHeight}px`;
+                }
+            } else {
+                scaler.style.transform = 'none';
+                scaler.style.width = '100%';
+                scaler.style.height = 'auto';
             }
         }
 
@@ -2388,6 +2427,14 @@
         
         // Слушаем загрузку содержимого iframe
         document.getElementById('previewFrame').addEventListener('load', adjustIframeHeight);
+        
+        // Масштабирование при изменении размера окна
+        window.addEventListener('resize', () => {
+            const iframe = document.getElementById('previewFrame');
+            if (iframe && iframe.contentDocument) {
+                scalePreview();
+            }
+        });
 
         // Горячие клавиши
         document.addEventListener('keydown', (e) => {
